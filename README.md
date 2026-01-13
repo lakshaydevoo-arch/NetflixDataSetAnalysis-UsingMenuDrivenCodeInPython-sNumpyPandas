@@ -1,2 +1,5 @@
 # NetflixDataSetAnalysis-UsingMenuDrivenCodeInPython-sNumpyPandas
 This project analyzes a movie dataset using Python, Pandas, NumPy, and Seaborn. It includes data cleaning, handling missing values, grouping by genre, year-wise analysis, and visualizations. A menu-driven program is used to explore and analyze the dataset interactively.
+
+
+This project focuses on exploring and analyzing a movie dataset using Python 🐍, Pandas 📑, NumPy 🧮, and Seaborn 📊. The dataset is cleaned by handling missing values ❓, checking and removing duplicates ♻️, and formatting data properly for analysis. A menu-driven program allows users to interactively view the dataset head 🔍, access specific rows and columns 📌, group movies by genre or category 🎭, and identify movies released in a particular year 📅. The project also visualizes year-wise movie release trends using bar graphs 📈, helping to better understand patterns in movie production over time. Overall, this project demonstrates practical skills in data cleaning, exploratory data analysis (EDA).
