@@ -2,78 +2,150 @@ import pandas as pd
 import seaborn as sb
 import matplotlib.pyplot as mpl
 
-data = pd.read_csv("file.csv")
-# As it is a large data set so it shows on printing the top 5 rows and last 5 columns
-print(data)
-print(data.info()) #To show indexes columns , datatypes of each column, memory at once
-#ch = int(input("Enter Your Choice : "))
-print("Enter 1: To get the HEAD of the dataset")
-print("OR")
-print("Enter 2: To check if duplicated values are present in the dataset")
-print("OR")
-print("Enter 3: To check if there are any NULL values present in the dataset")
-print("OR")
-print("Enter 4: To show all rows that have NULL values")
-print("OR")
-print("Enter 5: To handle/fill/remove NULL values")
-print("OR")
-print("Enter 6: To find the value at a specified row and column [R,C]")
-print("OR")
-print("Enter 7: To plot number of movies released each year (bar graph)")
-print("OR")
-print("Enter 8: To group movies by category/genre and see average rating")
-print("OR")
-print("Enter 9: To check which movies were released in the year 2000")
+# ------------------- Load Data ------------------- #
+def load_data(file_path):
+    data = pd.read_csv(file_path)
+    print("Data Loaded Successfully!\n")
+    print(data.head())
+    print(data.info())
+    return data
 
-while(True):
-    user_ch =  int(input())
-
-
-    if(user_ch == 1) :      
-        print(data.head())
-    elif(user_ch ==2):
-        print(data.duplicated()) 
-        print(data[data.duplicated()])
-        print("Dropping the duplicates data now!!! ")
-        data.drop_duplicates(inplace=True)
-        print("Now again printing the duplicates call we will get no duplicates: ")
-        print(data[data.duplicated()])
-    elif(user_ch ==3):
-        print(data.isnull()) # when true then there is a null values
-        print(data.isnull().sum()) # returns the sum of null values in every column
-    elif(user_ch == 4):
-        sb.heatmap(data.isnull())
-        mpl.show()
-    elif(user_ch ==5): # Handling null values
-        data.fillna("handled")
-        print(data[data.isnull()])
-    elif(user_ch == 6): # To find the specified column and speciied row in a data set [R,C]
-        print(data[data['Title'].isin(['House of Cards'])])
-    elif(user_ch == 7):
-        data['Release_Date'] = data['Release_Date'].str.strip() #Strip is needed because we have in this dataset a space beore the Release_Date
-        data['Data_newdatetime'] = pd.to_datetime(data['Release_Date'])
-        print(data['Data_newdatetime'].dt.year.value_counts()) # print is necessary to use with it
-        print(data)
-        print(data["Data_newdatetime"].dt.year.value_counts().plot(kind = "bar"))
-        mpl.show() #I HAVE SHOWN HERE USING BAR GRAPH
-    elif(user_ch ==8):
-        #This is group by function
-        print(data.groupby('Category').Category.count())# Count of movies and tv shows
-        print(data.groupby('Category').Category.count().plot(kind='bar')) 
-        mpl.show() # this shows all the sum of the values using bar graph
-        #Plotting using seaborn library
-        sb.countplot(data['Category'])
-        mpl.show()
-    elif(user_ch == 9):
-        #This is to check which movies were released in year 2000
-        data['Release_Date'] = data['Release_Date'].str.strip() #Strip is needed because we have in this dataset a space beore the Release_Date
-        data['Data_newdatetime'] = pd.to_datetime(data['Release_Date'])
-        print(data['Data_newdatetime'].dtype)
-        data['Year'] =   data['Data_newdatetime'].dt.year
-        print(data[(data['Category'] == 'Movie' ) & (data['Year'] == 2021)])
-    toend = input("Do you want to see more any of the detils of the datset or not ? ")
-    if(toend in 'Yy'):
-        continue
-    else:
-        break
+# ------------------- Basic Plots ------------------- #
+def plot_numeric_columns(data):
+    numeric_cols = data.select_dtypes(include=['number']).columns
+    if len(numeric_cols) < 2:
+        print("Not enough numeric columns to plot!")
+        return
     
+    x = numeric_cols[0]
+    y = numeric_cols[1]
+
+    # 1. Line Plot
+    mpl.figure(figsize=(8,4))
+    mpl.plot(data[x], data[y], marker='o')
+    mpl.title(f"Line Plot of {x} vs {y}")
+    mpl.xlabel(x)
+    mpl.ylabel(y)
+    mpl.show()
+
+    # 2. Bar Plot
+    mpl.figure(figsize=(8,4))
+    mpl.bar(data[x], data[y])
+    mpl.title(f"Bar Plot of {x} vs {y}")
+    mpl.xlabel(x)
+    mpl.ylabel(y)
+    mpl.show()
+
+    # 3. Histogram
+    mpl.figure(figsize=(8,4))
+    mpl.hist(data[y], bins=10, color='skyblue', edgecolor='black')
+    mpl.title(f"Histogram of {y}")
+    mpl.xlabel(y)
+    mpl.ylabel("Frequency")
+    mpl.show()
+
+    # 4. Heatmap
+    mpl.figure(figsize=(8,6))
+    sb.heatmap(data[numeric_cols].corr(), annot=True, cmap="coolwarm")
+    mpl.title("Correlation Heatmap")
+    mpl.show()
+
+# ------------------- Dataset Operations ------------------- #
+def show_head(data):
+    print(data.head())
+
+def check_duplicates(data):
+    print(data.duplicated())
+    print(data[data.duplicated()])
+    print("Dropping duplicate rows...")
+    data.drop_duplicates(inplace=True)
+    print("Duplicates removed.")
+    print(data[data.duplicated()])
+
+def check_nulls(data):
+    print(data.isnull())
+    print(data.isnull().sum())
+
+def plot_nulls_heatmap(data):
+    sb.heatmap(data.isnull())
+    mpl.show()
+
+def handle_nulls(data):
+    data.fillna("handled", inplace=True)
+    print("Nulls handled.")
+    print(data[data.isnull()])
+
+def find_row_by_title(data, title):
+    print(data[data['Title'].isin([title])])
+
+def movies_per_year(data):
+    data['Release_Date'] = data['Release_Date'].str.strip()
+    data['Data_newdatetime'] = pd.to_datetime(data['Release_Date'])
+    print(data['Data_newdatetime'].dt.year.value_counts())
+    data['Data_newdatetime'].dt.year.value_counts().plot(kind="bar")
+    mpl.show()
+
+def group_by_category(data):
+    print(data.groupby('Category').Category.count())
+    data.groupby('Category').Category.count().plot(kind='bar')
+    mpl.show()
+    sb.countplot(data['Category'])
+    mpl.show()
+
+def movies_in_year(data, year):
+    data['Release_Date'] = data['Release_Date'].str.strip()
+    data['Data_newdatetime'] = pd.to_datetime(data['Release_Date'])
+    data['Year'] = data['Data_newdatetime'].dt.year
+    print(data[(data['Category'] == 'Movie') & (data['Year'] == year)])
+
+
+def main():
+    file_path = "file.csv"
+    data = load_data(file_path)
+    
+    while True:
+        print("Menu Options:")
+        print("1: Show HEAD of dataset")
+        print("2: Check duplicates")
+        print("3: Check for NULL values")
+        print("4: Show NULL values heatmap")
+        print("5: Handle NULL values")
+        print("6: Find row by Title")
+        print("7: Plot movies per year")
+        print("8: Group by Category")
+        print("9: Movies released in a specific year")
+        print("10: Plot numeric columns overview")
+
+        choice = int(input("Enter your choice: "))
+
+        if choice == 1:
+            show_head(data)
+        elif choice == 2:
+            check_duplicates(data)
+        elif choice == 3:
+            check_nulls(data)
+        elif choice == 4:
+            plot_nulls_heatmap(data)
+        elif choice == 5:
+            handle_nulls(data)
+        elif choice == 6:
+            title = input("Enter the Title to search: ")
+            find_row_by_title(data, title)
+        elif choice == 7:
+            movies_per_year(data)
+        elif choice == 8:
+            group_by_category(data)
+        elif choice == 9:
+            year = int(input("Enter the year to search for movies: "))
+            movies_in_year(data, year)
+        elif choice == 10:
+            plot_numeric_columns(data)
+        else:
+            print("Invalid choice!")
+
+        cont = input("Do you want to continue? (Y/N): ")
+        if cont.lower() != 'y':
+            break
+
+if __name__ == "__main__":
+    main()
